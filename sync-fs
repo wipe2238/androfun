@@ -1,0 +1,35 @@
+#!/bin/bash
+
+. adb/.adb
+
+fs=$1
+
+if [ -z $fs ]; then
+    echo "fs not defined"
+    exit
+elif [ ! -f "fs/$fs.sh" ]; then
+    echo "missing fs script"
+    exit
+fi
+
+$adb wait-for-device
+
+echo "updating /system/$fs.sh ..."
+$adb push fs/$fs.sh /data/local/tmp/$fs.sh
+remount rw /system
+$adb shell su -c "busybox cp -f /data/local/tmp/$fs.sh /system/$fs.sh"
+$adb shell su -c "chmod 500 /system/$fs.sh"
+remount ro /system
+$adb shell rm /data/local/tmp/$fs.sh
+
+if [ -f fs/$fs.crontab ]; then
+    dir=$(getprop $fs.busybox.cron)
+    if [ "$dir" != "" ]; then
+        echo "updating crontab ($dir) ..."
+        $adb push fs/$fs.crontab /data/local/tmp/$fs.crontab
+        $adb shell su -c "busybox crontab -c $dir /data/local/tmp/$fs.crontab"
+        $adb shell rm /data/local/tmp/$fs.crontab
+    else
+        echo "updating crontab skipped (missing property: $fs.busybox.cron)"
+    fi
+fi

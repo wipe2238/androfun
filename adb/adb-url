@@ -1,0 +1,18 @@
+#!/bin/bash
+
+. .adb
+
+url=$1
+regex='(https?|ftp|file)://[-A-Za-z0-9\+&@#/%?=~_|!:,.;]*[-A-Za-z0-9\+&@#/%=~_|]'
+
+function usage()
+{
+    echo "Usage: $0 [url]"
+    exit
+}
+
+if [[ $url =~ $regex ]]; then
+    intent VIEW $url
+else
+    usage
+fi

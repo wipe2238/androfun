@@ -1,0 +1,23 @@
+#!/bin/bash
+
+. .adb
+
+delay=$1
+
+if [ -z $delay ]; then
+    delay=15
+fi
+
+level="0"
+
+while [[ $level -lt 100 ]]; do
+    $adb wait-for-device
+    level=`$adb shell dumpsys battery | grep "^[\ ]*level:\ [0-9]\+" | awk '{print $2}'`
+    level=${level%?}
+    echo -ne "\rBattery: ${level}%"
+    if [[ $level -lt 100 ]]; then
+        sleep $delay
+    else
+        echo
+    fi
+done

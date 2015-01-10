@@ -1,0 +1,6 @@
+/adb/adb-connect
+
+/fs/*.prop
+!/fs/example.prop
+
+/TMP

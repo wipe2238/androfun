@@ -1,0 +1,14 @@
+### GINA ###
+
+##
+## Enables adbd over wifi on given port
+#setprop gina.adb.wifi 5555
+
+##
+## Create symlink to functions provided by busybox
+## Skips commands already existing on system
+#setprop gina.busybox.links true
+
+##
+## Start cron daemon in given directory
+#setprop gina.busybox.cron /data/crontab
