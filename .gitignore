@@ -1,4 +1,5 @@
 /adb/adb-connect
+/adb/adbtest-*
 
 /fs/*.prop
 !/fs/example.prop

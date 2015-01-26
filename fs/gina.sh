@@ -1,7 +1,6 @@
 #!/system/bin/busybox sh
 
-busybox=$(busybox which busybox)
-busybox=$($busybox readlink -fn $busybox)
+busybox=$(busybox readlink -fn `busybox which busybox`)
 
 adb_wifi=$(getprop gina.adb.wifi)
 bb_cron=$(getprop gina.busybox.cron)
@@ -30,11 +29,19 @@ prepare_bin_link=0
 prepare_passwd=0
 prepare_resolv_conf=0
 
-if [ -n $bb_cron ]; then
+if [ -n "$bb_cron" ]; then
   prepare_passwd=1
   prepare_bin_link=1
 fi
 
+##
+## TODO:
+##  it does *not* set proper hostname (as seen across LAN) on phone boot...
+##
+setprop net.hostname gina
+echo gina > /proc/sys/kernel/hostname
+$busybox hostname gina
+sync
 ##
 ## prepare /system/vendor/bin
 ##
@@ -49,9 +56,8 @@ case $(getprop gina.busybox.links) in
   rmount rw /system
   $busybox mkdir -p /system/vendor/bin
   for lnk in $($busybox --list); do
-    local found=$($busybox which $lnk)
-    found=$($busybox readlink -fn $found)
-    if [ -z $found ]; then
+    local found=$($busybox readlink -fn `$busybox which $lnk`)
+    if [ -z "$found" ]; then
       # ignores
       if [ "$lnk" == "sh" ] || [ "$lnk" == "su" ] || [ "$lnk" == "sulogin" ]; then
         glog "  ignored: $lnk"
@@ -64,11 +70,10 @@ case $(getprop gina.busybox.links) in
       elif [ "$lnk" == "wget" ]; then
         prepare_resolv_conf=1
       fi
-      #
       glog "  created: $lnk"
       ln -s $busybox /system/vendor/bin/$lnk
-    else
-      glog "  skipped: $lnk = $found"
+    #else
+    #  glog "  skipped: $lnk = $found"
     fi
   done
   rmount ro/system
@@ -126,7 +131,7 @@ esac
 ##
 ## start adbd over wifi
 ##
-if [ -n $adb_wifi ] && [ $adb_wifi -gt 0 ]; then
+if [ -n "$adb_wifi" ] && [ $adb_wifi -gt 0 ]; then
   glog "starting adbd: $adb_wifi"
   setprop service.adb.tcp.port $adb_wifi
   stop adbd
@@ -139,7 +144,7 @@ fi
 ##
 ## start crond
 ##
-if [ -n $bb_cron ]; then
+if [ -n "$bb_cron" ]; then
   if [ ! -d $bb_cron ]; then
     glog "creating cron directory: $bb_cron"
     $busybox mkdir -p $bb_cron

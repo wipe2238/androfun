@@ -23,13 +23,14 @@ remount ro /system
 $adb shell rm /data/local/tmp/$fs.sh
 
 if [ -f fs/$fs.crontab ]; then
+    echo -n "updating crontab "
     dir=$(getprop $fs.busybox.cron)
     if [ "$dir" != "" ]; then
-        echo "updating crontab ($dir) ..."
+        echo "($dir) ..."
         $adb push fs/$fs.crontab /data/local/tmp/$fs.crontab
         $adb shell su -c "busybox crontab -c $dir /data/local/tmp/$fs.crontab"
         $adb shell rm /data/local/tmp/$fs.crontab
     else
-        echo "updating crontab skipped (missing property: $fs.busybox.cron)"
+        echo "skipped (missing property: $fs.busybox.cron)"
     fi
 fi

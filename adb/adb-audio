@@ -1,0 +1,18 @@
+#!/bin/bash
+
+. .adb
+
+function usage()
+{
+    echo "Usage: $0 [/path/to/file]"
+    exit
+}
+
+filename=$1
+
+if [ -z "$filename" ]; then usage; fi
+
+$adb wait-for-device
+keyevent 86
+intent VIEW "file://$filename" -t "audio/*" -n "com.android.music/.MediaPlaybackActivity"
+key_back

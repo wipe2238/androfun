@@ -1,0 +1,32 @@
+#!/bin/bash
+
+. .adb
+. .adb-keycode
+
+function usage()
+{
+    echo "Usage: $0 [keycode]"
+    echo "       $0 --list"
+    exit
+}
+
+key=$1
+
+if [ -z "$key" ]; then usage; fi
+
+if [ "$key" == "--list" ]; then
+    keys=(${!keycode[@]})
+    #for (( i=0; $i < ${#keycode[@]}; i+=1 )); do
+    for i in ${!keycode[@]}; do
+        echo "$i = ${keycode[$i]}"
+    done | sort -n -k3 | less
+elif [[ $key =~ ^[0-9]+$ ]]; then
+    keyevent $key
+else
+    if [ ${keycode[$key]+_} ]; then
+        echo "Keycode '$key' = ${keycode[$key]}"
+        keyevent ${keycode[$key]}
+    else
+	echo "Keycode '$key' not found"
+    fi
+fi

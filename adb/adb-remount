@@ -2,14 +2,14 @@
 
 . .adb
 
-mode=$1
-dir=$2
-
 function usage()
 {
     echo "Usage: $0 [rw/ro] [dir]"
     exit
 }
+
+mode=$1
+dir=$2
 
 if [ -z $mode ] || [ -z $dir ]; then usage; fi
 if [ $mode != "ro" ] && [ $mode != "rw" ]; then usage; fi

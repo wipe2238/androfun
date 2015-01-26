@@ -1,3 +1,15 @@
+#!/bin/bash
+# ^ only for correct syntax hilighting :)
+
+function api_level()
+{
+    local api=$(getprop ro.build.version.sdk)
+
+    if [ -z "$api" ]; then error "can't find API level"; fi
+
+    echo -n $api
+}
+
 function error()
 {
     local msg=$1
@@ -46,11 +58,41 @@ function getprop
 
 function intent()
 {
+    local start=start
     local action=$1
+    if [ "$action" == "service" ]; then
+        start=startservice
+        shift
+        action=$1
+    fi
+
     local arg=$2
+    shift 2
+
+    if [ -z "$action" ]; then error "action not set"; fi
+    if [ -z "$arg" ]; then error "arg not set"; fi
 
     $adb wait-for-device
-    $adb shell am start -a android.intent.action.$action -d $arg
+    $adb shell am $start -a "android.intent.action.$action" -d \"$arg\" $@
+}
+
+function keyevent()
+{
+    local id=$1
+
+    if [ -z "$id" ]; then error "key not set"; fi
+
+    $adb shell input keyevent $id
+}
+
+function key_home()
+{
+    keyevent 3
+}
+
+function key_back()
+{
+    keyevent 4
 }
 
 function remount()
@@ -67,7 +109,7 @@ function remount()
 }
 
 # ...and let's hope it's not the old shit from android-sdk-linux...
-adb=`which adb`
+adb=$(readlink -nf `which adb`)
 if [ -z "$adb" ]; then
     error "adb not found" 1
 fi

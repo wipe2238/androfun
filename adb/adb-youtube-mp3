@@ -1,0 +1,23 @@
+#!/bin/bash
+
+. .adb
+
+function usage()
+{
+    echo "Usage: $0 [youtube_id] [/target/path]"
+    exit
+}
+
+id=$1
+target=$2
+
+if [ -z "$id" ]; then usage; fi
+if [ -z "$target" ]; then usage; fi
+
+if [ -z "`which youtube-dl`" ]; then
+    echo "Missing youtube-dl"
+    exit
+fi
+
+$adb wait-for-device
+youtube-dl "https://youtube.com/watch?v=$id" --extract-audio --audio-format mp3 --exec "adb push {} $target && rm {}"
